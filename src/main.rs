@@ -1,8 +1,13 @@
 #![warn(clippy::str_to_string)]
 
 mod commands;
-mod twitch;
+mod twitch {
+    pub mod token;
+    pub mod subscription;
+    pub mod stream_info;
+}
 mod handler;
+mod config;
 
 use poise::serenity_prelude as serenity;
 use std::{
@@ -11,6 +16,7 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
+use config::Config;
 use dotenv::dotenv;
 
 // Types used by all command functions
@@ -20,7 +26,6 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 // Custom user data passed to all command functions
 pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
-    discord_http: Arc<serenity::Http>,
 }
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
@@ -48,7 +53,7 @@ async fn main() {
     // FrameworkOptions contains all of poise's configuration option in one struct
     // Every option can be omitted to use its default value
     let options = poise::FrameworkOptions {
-        commands: vec![commands::help(), commands::vote(), commands::getvotes()],
+        commands: vec![commands::help(), commands::ping()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("/".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -103,10 +108,8 @@ async fn main() {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                let http = ctx.http.clone();
                 Ok(Data {
                     votes: Mutex::new(HashMap::new()),
-                    discord_http: http,
                 })
             })
         })
@@ -121,6 +124,12 @@ async fn main() {
         .expect("Missing `TWITCH_CLIENT_SECRET` env var, see README for more information.");
     let callback_url = var("CALLBACK_URL")
         .expect("Missing `CALLBACK_URL` env var, see README for more information.");
+    let channel_secret = var("CHANNEL_SECRET")
+        .expect("Missing `CHANNEL_SECRET` env var, see README for more information.");
+    let broadcaster_id = var("BROADCASTER_ID")
+        .expect("Missing `BROADCASTER_ID` env var, see README for more information.");
+    let channel_id = var("CHANNEL_ID")
+        .expect("Missing `CHANNEL_ID` env var, see README for more information.");
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
@@ -128,18 +137,27 @@ async fn main() {
         .framework(framework)
         .await;
 
+    if client.is_err() {
+        eprintln!("Erreur lors de la connexion au client Discord : {:?}", client.err());
+        return;
+    }
+
     let web_port = 8080;
 
-    let data = Arc::new(Data {
-        votes: Mutex::new(HashMap::new()),
+    let config = Arc::new(Config {
+        channel_secret: channel_secret.clone(),
+        client_id: client_id.clone(),
+        client_secret: client_secret.clone(),
+        broadcaster_id,
+        channel_id: serenity::ChannelId::new(channel_id.parse().unwrap()),
         discord_http: client.as_ref().unwrap().http.clone(),
     });
 
     // Démarrer le serveur web en parallèle
-    let web_server = tokio::spawn(handler::setup_web_server(web_port, data));
+    let web_server = tokio::spawn(handler::setup_web_server(web_port, config));
     println!("Serveur Web lancé sur le port {}", web_port);
 
-    if let Err(e) = twitch::create_twitch_subscription(&client_id, &client_secret, &callback_url).await {
+    if let Err(e) = twitch::subscription::create_twitch_subscription(&client_id, &client_secret, &callback_url).await {
         eprintln!("Erreur : {:?}", e);
     }
 
@@ -155,7 +173,7 @@ async fn main() {
         }
         web_result = web_server => {
             if let Err(e) = web_result {
-                eprintln!("Erreur du serveur Actix : {:?}", e);
+                eprintln!("Erreur du serveur web : {:?}", e);
             }
         }
     }
