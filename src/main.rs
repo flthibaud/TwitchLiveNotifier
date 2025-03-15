@@ -142,7 +142,10 @@ async fn main() {
         return;
     }
 
-    let web_port = 8080;
+    let web_port = var("PORT")
+        .expect("Missing `PORT` env var, see README for more information.")
+        .parse()
+        .expect("`PORT` must be a valid port number");
 
     let config = Arc::new(Config {
         channel_secret: channel_secret.clone(),
