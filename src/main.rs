@@ -11,9 +11,8 @@ mod config;
 
 use poise::serenity_prelude as serenity;
 use std::{
-    collections::HashMap,
     env::var,
-    sync::{Arc, Mutex},
+    sync::Arc,
     time::Duration,
 };
 use config::Config;
@@ -24,9 +23,7 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 // Custom user data passed to all command functions
-pub struct Data {
-    votes: Mutex<HashMap<String, u32>>,
-}
+pub struct Data {}
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // This is our custom error handler
@@ -108,9 +105,7 @@ async fn main() {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {
-                    votes: Mutex::new(HashMap::new()),
-                })
+                Ok(Data {})
             })
         })
         .options(options)
@@ -148,21 +143,22 @@ async fn main() {
         .expect("`PORT` must be a valid port number");
 
     let config = Arc::new(Config {
-        channel_secret: channel_secret.clone(),
-        client_id: client_id.clone(),
-        client_secret: client_secret.clone(),
+        channel_secret,
+        client_id,
+        client_secret,
         broadcaster_id,
+        callback_url,
         channel_id: serenity::ChannelId::new(channel_id.parse().unwrap()),
         discord_http: client.as_ref().unwrap().http.clone(),
     });
 
-    // Démarrer le serveur web en parallèle
-    let web_server = tokio::spawn(handler::setup_web_server(web_port, config));
-    println!("Serveur Web lancé sur le port {}", web_port);
-
-    if let Err(e) = twitch::subscription::create_twitch_subscription(&client_id, &client_secret, &callback_url).await {
-        eprintln!("Erreur : {:?}", e);
+    if let Err(e) = twitch::subscription::create_twitch_subscription(config.clone()).await {
+        eprintln!("Erreur lors de la création de la souscription Twitch : {:?}", e);
     }
+
+    // Démarrer le serveur web en parallèle
+    let web_server = tokio::spawn(handler::setup_web_server(web_port, config.clone()));
+    println!("Serveur Web lancé sur le port {}", web_port);
 
     // Start the Discord client
     let mut discord_client = client.expect("Failed to start Discord client");

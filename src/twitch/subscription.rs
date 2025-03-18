@@ -1,12 +1,14 @@
 use reqwest::Client;
 use serde_json::json;
+use std::sync::Arc;
 
+use crate::config::Config;
 use crate::twitch::token::get_twitch_access_token;
 
-pub async fn create_twitch_subscription(client_id: &str, client_secret: &str, callback_url: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn create_twitch_subscription(config: Arc<Config>) -> Result<(), Box<dyn std::error::Error>> {
     let events = vec!["stream.online", "stream.offline"];
 
-    let access_token = get_twitch_access_token(client_id, client_secret).await?;
+    let access_token = get_twitch_access_token(&config.client_id, &config.client_secret).await?;
 
     let client = Client::new();
     
@@ -15,19 +17,19 @@ pub async fn create_twitch_subscription(client_id: &str, client_secret: &str, ca
             "type": event,
             "version": "1",
             "condition": {
-                "broadcaster_user_id": "1279343673" // Remplace avec l'ID du streamer
+                "broadcaster_user_id": &config.broadcaster_id,
             },
             "transport": {
                 "method": "webhook",
-                "callback": callback_url, // URL où Twitch enverra les notifications
-                "secret": "ton_channel_secret"
+                "callback": &config.callback_url, // URL où Twitch enverra les notifications
+                "secret": &config.channel_secret,
             }
         });
 
         let res = client
             .post("https://api.twitch.tv/helix/eventsub/subscriptions")
             .header("Authorization", format!("Bearer {}", access_token))
-            .header("Client-Id", client_id)
+            .header("Client-Id", &config.client_id)
             .header("Content-Type", "application/json")
             .json(&body)
             .send()

@@ -7,5 +7,6 @@ pub struct Config {
   pub channel_id: serenity::ChannelId,
   pub client_id: String,
   pub client_secret: String,
+  pub callback_url: String,
   pub discord_http: Arc<serenity::Http>,
 }
