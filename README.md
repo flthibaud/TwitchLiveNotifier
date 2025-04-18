@@ -1,6 +1,6 @@
-# Discord Twitch Bot Template
+# TwitchLiveNotifier
 
-A modular Go template for a Discord bot that notifies multiple Twitch channels when they go live via EventSub webhooks.
+TwitchLiveNotifier is a modular Go application for a Discord bot that notifies multiple Twitch channels when they go live using Twitch EventSub webhooks.
 
 ## Prerequisites
 
