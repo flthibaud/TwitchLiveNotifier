@@ -39,7 +39,7 @@ LOG_LEVEL=info
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/discord-twitch-bot.git
+git clone https://github.com/flthibaud/discord-twitch-bot.git
 cd discord-twitch-bot
 ``` 
 2. Install dependencies and tidy modules:
