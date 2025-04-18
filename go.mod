@@ -1,4 +1,4 @@
-module discord-bot-env
+module github.com/flthibaud/TwitchLiveNotifier
 
 go 1.20
 

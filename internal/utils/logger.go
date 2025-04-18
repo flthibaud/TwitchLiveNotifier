@@ -4,8 +4,7 @@ import (
 	"os"
 	"time"
 
-	"discord-bot-env/internal/config"
-
+	"github.com/flthibaud/TwitchLiveNotifier/internal/config"
 	"github.com/sirupsen/logrus"
 )
 

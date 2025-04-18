@@ -12,10 +12,9 @@ import (
 	"net/http"
 	"time"
 
-	"discord-bot-env/internal/config"
-	"discord-bot-env/internal/discord"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/config"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/discord"
 	"github.com/sirupsen/logrus"
 )
 

@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"time"
 
-	"discord-bot-env/internal/config"
-	"discord-bot-env/internal/discord"
-	"discord-bot-env/internal/discord/twitch"
-	"discord-bot-env/internal/utils"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/config"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/discord"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/discord/twitch"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/utils"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	<-stop
-	logger.Info("Signal reçu, arrêt en cours…")
+	logger.Info("Received shutdown signal, shutting down...")
 	cancel()             // provoque la sortie de Start
 	discordClient.Stop() // appelle session.Close()
 

@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"discord-bot-env/internal/config"
-	"discord-bot-env/internal/discord/commands"
-	"discord-bot-env/internal/discord/events"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/config"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/discord/commands"
+	"github.com/flthibaud/TwitchLiveNotifier/internal/discord/events"
 	"github.com/sirupsen/logrus"
 )
 
