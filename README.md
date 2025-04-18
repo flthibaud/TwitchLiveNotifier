@@ -128,6 +128,10 @@ Planned features and improvements:
 
 - **Unit & Integration Tests**: Improve coverage for core modules (Discord commands, Twitch webhook handling).
 
+- **Internationalization**: Add support for multiple languages in bot messages, embeds, and notifications
+
+- **Docker support**: Create a Dockerfile for easy deployment and containerization.
+
 ## Contributing
 
 Feel free to fork the repo and submit pull requests for improvements or new features. Please ensure your code follows Go conventions and is well-documented.
