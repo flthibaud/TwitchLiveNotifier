@@ -23,3 +23,5 @@ vet:
 clean:
 	@echo "Cleaning..."
 	@rm -f main
+
+.PHONY: all build run fmt vet clean
