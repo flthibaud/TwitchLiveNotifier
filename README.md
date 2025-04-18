@@ -39,8 +39,8 @@ LOG_LEVEL=info
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/flthibaud/discord-twitch-bot.git
-cd discord-twitch-bot
+git clone https://github.com/flthibaud/TwitchLiveNotifier.git
+cd TwitchLiveNotifier
 ``` 
 2. Install dependencies and tidy modules:
 ```bash
@@ -67,7 +67,7 @@ go build -o discord-twitch-bot ./cmd/bot
 ## Project Structure
 
 ```
-discord-twitch-bot/
+TwitchLiveNotifier/
 ├── .env.example             # Example environment variables
 ├── cmd/
 │   └── bot/
